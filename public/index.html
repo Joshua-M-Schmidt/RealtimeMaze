@@ -14,13 +14,13 @@
   <body>
     <header>
       <h1 id="logo">Realtime Maze</h1>
+      <p id="new_maze">New Maze</p>
     </header>
     <main>
       <div id="maze"></div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/p5@1.2.0/lib/p5.js"></script>
-    <script src="index.js"></script>
 
     <!-- Insert these scripts at the bottom of the HTML, but before you use any Firebase services -->
 
@@ -34,7 +34,32 @@
     <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-firestore.js"></script>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script src="index.js"></script>
+
     <script>
+
+      var id;
+
+      function createUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+      }
+
+      if(localStorage.getItem('uuid')){
+        id= localStorage.getItem('uuid');
+      }else{
+        id = createUUID();
+        localStorage.setItem('uuid', id);
+      }
+
+      var seed = 0;
+      var players = [];
+
+      var myp5;
       // TODO: Replace the following with your app's Firebase project configuration
       // For Firebase JavaScript SDK v7.20.0 and later, `measurementId` is an optional field
       var firebaseConfig = {
@@ -53,18 +78,101 @@
       firebase.initializeApp(firebaseConfig);
 
       var db = firebase.firestore();
-      db.collection("users")
-        .add({
-          first: "Ada",
-          last: "Lovelace",
-          born: 1815,
-        })
-        .then(function (docRef) {
-          console.log("Document written with ID: ", docRef.id);
+
+      // init maze
+
+      var docRef = db.collection("maze").doc("yd5zLMtR7G63N14DkA6U");
+      docRef.get()
+        .then(function (doc) {
+          if (doc.exists) {
+            seed = doc.data().seed;
+            myp5 = new p5(s, "maze");
+          } else {
+            console.log("No such document!");
+          }
         })
         .catch(function (error) {
-          console.error("Error adding document: ", error);
+          console.log("Error getting document:", error);
         });
+
+      // neww maze
+
+      $("#new_maze").click(function () {
+        var mazeDoc = db.collection("maze").doc("yd5zLMtR7G63N14DkA6U");
+
+        // Uncomment to initialize the doc.
+        // sfDocRef.set({ population: 0 });
+
+        return db.runTransaction(function (transaction) {
+            // This code may get re-run multiple times if there are conflicts.
+            return transaction.get(mazeDoc).then(function (mDoc) {
+              if (!mDoc.exists) {
+                throw "Document does not exist!";
+              }
+
+              // Add one person to the city population.
+              // Note: this could be done without a transaction
+              //       by updating the population using FieldValue.increment()
+              var newSeed = Math.floor(Math.random() * 10000);
+              transaction.update(mazeDoc, { seed: newSeed });
+              location.reload();
+            });
+          })
+          .then(function () {
+            console.log("Transaction successfully committed!");
+          })
+          .catch(function (error) {
+            console.log("Transaction failed: ", error);
+          });
+      });
+
+      var docRef = db.collection("maze").doc(id);
+
+      docRef.get().then(function(doc) {
+          if (doc.exists) {
+              console.log("Document data:", doc.data());
+          } else {
+                            // doc.data() will be undefined in this case
+              db.collection("player").doc(id).set({
+                  x: 0,
+                  y: 0,
+                  id: id
+              })
+              .then(function() {
+                  console.log("Document successfully written!");
+              })
+              .catch(function(error) {
+                  console.error("Error writing document: ", error);
+              });
+              console.log("No such document!");
+          }
+      }).catch(function(error) {
+          console.log("Error getting document:", error);
+      });
+
+
+      db.collection("player").where("id", "!=", id)
+        .onSnapshot(function(querySnapshot) {
+          players = [];
+          querySnapshot.forEach(function(doc) {
+              players.push(doc.data());
+          });
+          console.log("players update ", players);
+      });
+
+      db.collection("player").where("id", "!=", id)
+          .get()
+          .then(function(querySnapshot) {
+              querySnapshot.forEach(function(doc) {
+                  // doc.data() is never undefined for query doc snapshots
+                  players.push(doc.data());
+                  console.log(doc.id, " => ", doc.data());
+              });
+          })
+          .catch(function(error) {
+              console.log("Error getting documents: ", error);
+          });
+
     </script>
   </body>
 </html>

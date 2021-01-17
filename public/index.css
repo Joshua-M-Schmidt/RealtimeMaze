@@ -7,6 +7,13 @@ html,body,input,textarea,keygen,select,button {
     font-family:'Nunito','Roboto',"proxima-nova","Proxima Nova", sans-serif;
 }
 
+#new_maze{
+    cursor: pointer;
+    margin-right: 20px;
+    padding: 0;
+    color: white;
+}
+
 header{
     background-color: crimson;
     height: 5;

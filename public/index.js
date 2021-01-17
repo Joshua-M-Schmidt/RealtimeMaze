@@ -1,10 +1,7 @@
 
-var seed = 10;
-
 function getDirection(possibleDirections){
     var x = Math.sin(seed++) * 10000;
     return possibleDirections[Math.floor((x - Math.floor(x)) * possibleDirections.length)]
-
     //return possibleDirections[Math.floor(Math.random() * possibleDirections.length)];
 }
 
@@ -84,7 +81,7 @@ var cells = new Array(gridSize);
 var players = [];
 var self;
 
-var s = function( p ) { // p could be any variable name
+function s( p) { // p could be any variable name
     var sketchWidth;
     var sketchHeight;
 
@@ -207,7 +204,10 @@ var s = function( p ) { // p could be any variable name
 
     p.draw = function() {
         p.background(245);
-        
+        for(var n = 0; n < players.length; n++){
+            p.fill(p.color("magenta"));
+            p.circle(cells[players[n].x][players[n].y].x+ (elementSize/2), cells[players[n].x][players[n].y].y+(elementSize/2), elementSize*0.8);
+        }
         
     
         // Loop to initilize 2D array elements. 
@@ -254,7 +254,6 @@ var s = function( p ) { // p could be any variable name
     };
 
     p.keyPressed = function() {
-        
         switch(p.key){
             case 'a':
                 if(self.x-1 >= 0 && (cells[self.x][self.y].l == false)){
@@ -279,8 +278,28 @@ var s = function( p ) { // p could be any variable name
             default:
                 break;
         }
-    };
-  };
 
-  var myp5 = new p5(s, 'maze');
-  
+        var sfDocRef = db.collection("player").doc(id);
+
+        // Uncomment to initialize the doc.
+        // sfDocRef.set({ population: 0 });
+
+        db.runTransaction(function(transaction) {
+            // This code may get re-run multiple times if there are conflicts.
+            return transaction.get(sfDocRef).then(function(sfDoc) {
+                if (!sfDoc.exists) {
+                    throw "Document does not exist!";
+                }
+
+                // Add one person to the city population.
+                // Note: this could be done without a transaction
+                //       by updating the population using FieldValue.increment()
+                transaction.update(sfDocRef, { x: self.x, y:self.y });
+            });
+        }).then(function() {
+            console.log("Transaction successfully committed!");
+        }).catch(function(error) {
+            console.log("Transaction failed: ", error);
+        });
+    };
+}
