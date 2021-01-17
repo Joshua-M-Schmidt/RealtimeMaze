@@ -1,0 +1,80 @@
+html,body{
+    margin: 0;
+    padding: 0;
+}
+
+html,body,input,textarea,keygen,select,button {
+    font-family:'Nunito','Roboto',"proxima-nova","Proxima Nova", sans-serif;
+}
+
+header{
+    background-color: crimson;
+    height: 5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#logo{
+    font-weight: 900;
+    margin: 10px;
+    padding: 0;
+    color: white;
+}
+
+main{
+    width: 100%;
+    margin: auto;
+    margin-top: 0;
+}
+
+#maze{
+    width: 100vw;
+    height: 100vw;
+}
+
+
+@media (min-width: 640px) {
+    main{
+        width: 100%;
+        margin-top: 0;
+    }
+}
+
+@media (min-width: 768px) {
+    main{
+        width: 90%;
+        margin-top: 3vh;
+    }
+
+    #maze{
+        width: 90vw;
+        height: 90vw;
+    }
+}
+
+@media (min-width: 1024px) {
+    main{
+        width: 70%;
+        margin-top: 3vh;
+    }
+
+    #maze{
+        width: 70vw;
+        height: 70vw;
+    }
+}
+
+@media (min-width: 1280px) {
+    main{
+        width: 920px;
+        margin-top: 3vh;
+    }
+
+    #maze{
+        width: 920px;
+        height: 920px;
+    }
+}
+
+
