@@ -301,5 +301,36 @@ function s( p) { // p could be any variable name
         }).catch(function(error) {
             console.log("Transaction failed: ", error);
         });
+
+        if(self.y == gridSize-1 && self.x == gridSize-1){
+            alert("you won");
+
+            var mazeDoc = db.collection("maze").doc("yd5zLMtR7G63N14DkA6U");
+
+            // Uncomment to initialize the doc.
+            // sfDocRef.set({ population: 0 });
+
+            return db.runTransaction(function (transaction) {
+                // This code may get re-run multiple times if there are conflicts.
+                return transaction.get(mazeDoc).then(function (mDoc) {
+                if (!mDoc.exists) {
+                    throw "Document does not exist!";
+                }
+
+                // Add one person to the city population.
+                // Note: this could be done without a transaction
+                //       by updating the population using FieldValue.increment()
+                var newSeed = Math.floor(Math.random() * 10000);
+                transaction.update(mazeDoc, { seed: newSeed });
+                location.reload();
+                });
+            })
+            .then(function () {
+                console.log("Transaction successfully committed!");
+            })
+            .catch(function (error) {
+                console.log("Transaction failed: ", error);
+            });
+        }
     };
 }

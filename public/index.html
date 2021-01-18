@@ -14,7 +14,6 @@
   <body>
     <header>
       <h1 id="logo">Realtime Maze</h1>
-      <p id="new_maze">New Maze</p>
     </header>
     <main>
       <div id="maze"></div>
@@ -96,35 +95,6 @@
         });
 
       // neww maze
-
-      $("#new_maze").click(function () {
-        var mazeDoc = db.collection("maze").doc("yd5zLMtR7G63N14DkA6U");
-
-        // Uncomment to initialize the doc.
-        // sfDocRef.set({ population: 0 });
-
-        return db.runTransaction(function (transaction) {
-            // This code may get re-run multiple times if there are conflicts.
-            return transaction.get(mazeDoc).then(function (mDoc) {
-              if (!mDoc.exists) {
-                throw "Document does not exist!";
-              }
-
-              // Add one person to the city population.
-              // Note: this could be done without a transaction
-              //       by updating the population using FieldValue.increment()
-              var newSeed = Math.floor(Math.random() * 10000);
-              transaction.update(mazeDoc, { seed: newSeed });
-              location.reload();
-            });
-          })
-          .then(function () {
-            console.log("Transaction successfully committed!");
-          })
-          .catch(function (error) {
-            console.log("Transaction failed: ", error);
-          });
-      });
 
       var docRef = db.collection("maze").doc(id);
 
